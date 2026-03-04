@@ -1,4 +1,5 @@
 #include "system.hpp"
+#include "common.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -6,7 +7,7 @@
 
 int System::cpu_info(cpu_stats* cpu) {
     if (cpu == nullptr) {
-        std::cerr << "cpu_info : NULL pointer provided\n";;
+        Common::print_log(stderr, "cpu_info : NULL pointer provided\n");
         return 1;
     }
 
@@ -41,7 +42,7 @@ int System::cpu_info(cpu_stats* cpu) {
 
 int System::mem_info(mem_stats* mem) {
     if (mem == nullptr) {
-        std::cerr << "mem_info : NULL pointer provided\n";;
+        Common::print_log(stderr, "mem_info : NULL pointer provided\n");
         return -1;
     }
 
@@ -78,7 +79,7 @@ int System::mem_info(mem_stats* mem) {
 
 int System::uptime_info(int* hours, int* minutes) {
     if (hours == nullptr || minutes == nullptr) {
-        std::cerr << "uptime_info : NULL pointer provided\n";
+        Common::print_log(stderr, "uptime_info : NULL pointer provided\n");
         return -1;
     }
 
@@ -106,7 +107,7 @@ int System::uptime_info(int* hours, int* minutes) {
 
 int System::system_infos(system_stats* system_stats) {
     if (system_stats == nullptr) {
-        std::cerr << "system_infos : NULL pointer provided\n";
+        Common::print_log(stderr, "system_infos : NULL pointer provided\n");
         return -1;
     }
 

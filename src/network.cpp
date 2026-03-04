@@ -1,5 +1,6 @@
 #include "network.hpp"
 #include "system.hpp"
+#include "common.hpp"
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -19,15 +20,15 @@
 
 int connection_socket = -1;
 int connected_socket = -1;
-volatile int stop = 0;
+volatile sig_atomic_t stop = 0;
+static void (*cleanup_callback)(void) = NULL;
 
 void Network::handle_signal(int sig_number) {
     (void)sig_number;
     stop = 1;
 
     if (connected_socket != -1) {
-        const char msg[] = "(Server) Caught user request to close the connection.\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        Common::print_log(stdout, "Server : Caught user request to close the connection.\n");
 
         /* To force stopping recv. */
         shutdown(connected_socket, SHUT_RDWR);
@@ -39,17 +40,23 @@ void Network::handle_signal(int sig_number) {
         close(connection_socket);
         connection_socket = -1;
     }
+
+    if (cleanup_callback) {
+        cleanup_callback();
+    }
 }
 
-int Network::run(void) {
-    signal(SIGINT, Network::handle_signal);
+int Network::run(void close_log_file()) {
+    cleanup_callback = close_log_file;
+
+    signal(SIGTERM, Network::handle_signal);
 
     System system;
 
     /* Create local socket.  */
     connection_socket = socket(SOCKET_FAMILY, SOCK_STREAM, 0);
     if (connection_socket == -1) {
-        throw std::runtime_error("(Server) : Failed to create socket");
+        throw std::runtime_error("Server : Failed to create socket");
     }
 
     sockaddr_un socket_name;
@@ -67,7 +74,7 @@ int Network::run(void) {
 
     int bind_return_code = bind(connection_socket, (const sockaddr*) &socket_name, socket_name_size);
     if (bind_return_code == -1) {
-        throw std::runtime_error("(Server) : Failed to bind socket FD and socket address");
+        throw std::runtime_error("Server : Failed to bind socket FD and socket address");
     }
 
     /*
@@ -75,10 +82,10 @@ int Network::run(void) {
     * So while one request is being processed other request can be waiting.
     */
     if(listen(connection_socket, MAX_CONNECTION_REQUEST) == -1) {
-        throw std::runtime_error("(Server) : Failed to accept connections");
+        throw std::runtime_error("Server : Failed to accept connections");
     };
 
-    std::cout << "Waiting for new connection...\n";
+    Common::print_log(stdout, "Server : Waiting for new connection...\n");
 
     /**
      * fcntl() is used to manipulate a file descriptor.
@@ -120,7 +127,7 @@ int Network::run(void) {
         int ready_fds = select(connection_socket + 1, &readfds, NULL, NULL, &tv);
         if (ready_fds == -1) {
             if (stop) break;
-            throw std::runtime_error("(Server) : Failed to monitor multiple FD");
+            throw std::runtime_error("Server : Failed to monitor multiple FD");
         } else if (ready_fds == 0) {
             /* Timeout expired. We need to check stop variable. */
             continue;
@@ -137,7 +144,7 @@ int Network::run(void) {
             connected_socket = accept(connection_socket, NULL, NULL);
             if (connected_socket == -1) {
                 if (stop) break;
-                throw std::runtime_error("(Server) : Failed to accept connection");
+                throw std::runtime_error("Server : Failed to accept connection");
                 continue;
             }
     
@@ -148,26 +155,26 @@ int Network::run(void) {
             while((received_bytes = recv(connected_socket, rec_buffer, BUFFER_SIZE - 1, 0)) > 0) {
                 /* Ensure buffer is 0-terminated.  */
                 rec_buffer[received_bytes] = '\0';
-                std::cout << "(Server) message received : " << rec_buffer << std::endl;
+                Common::print_log(stdout, "Server : Message received : %s\n", rec_buffer);
 
                 /* Retrieve system stats. */
                 if ((system.system_infos(&system_stats)) != 0) {
-                    std::cerr << "Server) : Failed to retrieve system infos.\n";
+                    Common::print_log(stderr, "Server : Failed to retrieve system infos.\n");
                     break;
                 };
 
                 /* Send serialized system stats. */
                 if ((send(connected_socket, &system_stats, sizeof(system_stats), 0)) == -1) {
-                    std::cerr << "Server) : Failed to send response.\n";
+                    Common::print_log(stderr, "Server : Failed to send response.\n");
                     break;
                 }
             }
 
             if (received_bytes == -1) {
                 if (stop) break;
-                std::cerr << "Server) : Failed to read received bytes.\n";
+                Common::print_log(stderr, "Server : Failed to read received bytes.\n");
             } else if (received_bytes == 0) {
-                std::cout << "(Server) client disconnected.\n";
+                Common::print_log(stdout, "Server : Client disconnected.\n");
                 close(connected_socket);
                 connected_socket = -1;
             }

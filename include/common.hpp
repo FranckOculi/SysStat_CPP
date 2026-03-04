@@ -2,6 +2,7 @@
 #define __COMMON__
 
 #include "system.hpp"
+#include <cstdio>
 
 #define RED   "\033[31m"
 #define GREEN "\033[32m"
@@ -17,6 +18,7 @@ class Common {
         static void print_uptime(int hours, int minutes);
         static int calcul_cpu_active(const System::system_stats *current, const System::system_stats *prev);
         static int calcul_mem_active(const System::system_stats *current);
+        static void print_log(FILE *stream, const char *fmt, ...);
 };
 
 #endif

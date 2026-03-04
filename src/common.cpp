@@ -1,5 +1,7 @@
 #include "common.hpp"
 
+#include <cstdarg>
+#include <ctime>
 #include <iostream>
 
 void Common::print_cpu(int cpu) {
@@ -39,4 +41,18 @@ int Common::calcul_mem_active(const System::system_stats* current) {
     }
 
     return 0;
+}
+
+void Common::print_log(FILE *stream, const char *fmt, ...) {
+    time_t current_time = time(NULL);
+    tm *tm_info = localtime(&current_time);
+
+    char buffer[32];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+    fprintf(stream, "[%s] - ", buffer);
+
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stream, fmt, args);
+    va_end(args);
 }

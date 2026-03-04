@@ -30,4 +30,5 @@ The printstat function will call system service and print result in your termina
 -   [x] Create system service
 -   [x] Create printstat
 -   [x] Create socket server
+-   [x] Daemonize app
 -   [ ] Create client test
