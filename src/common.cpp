@@ -1,0 +1,42 @@
+#include "common.hpp"
+
+#include <iostream>
+
+void Common::print_cpu(int cpu) {
+    if (cpu > 80) printf(RED "CPU: %.d%%\n" RESET, cpu);
+    else if (cpu > 40) printf(YELLOW "CPU: %d%%\n" RESET, cpu);
+    else printf(GREEN "CPU: %.d%%\n" RESET, cpu);
+}
+
+void Common::print_mem(int mem) {
+    if (mem == 0) std::cout << "Mem: ---\n";
+    else if (mem > 80) printf(RED "Mem: %.d%%\n" RESET, mem);
+    else if (mem > 40) printf(YELLOW "Mem: %.d%%\n" RESET, mem);
+    else printf(GREEN "Mem: %d%%\n" RESET, mem);
+}
+
+void Common::print_uptime(int hours, int minutes) {
+    if (hours >= 5) printf(RED "Uptime: %02d:%02d\n" RESET, hours, minutes);
+    else if (hours > 2) printf(YELLOW "Uptime: %02d:%02d\n" RESET, hours, minutes);
+    else printf(GREEN "Uptime: %02d:%02d\n" RESET, hours, minutes);
+}
+
+int Common::calcul_cpu_active(const System::system_stats* current, const System::system_stats* prev) {
+    unsigned long long delta_total, delta_usage = 0;
+
+    delta_total = current->cpu.total - prev->cpu.total;
+    delta_usage = (current->cpu.total - current->cpu.idle_time) - (prev->cpu.total - prev->cpu.idle_time);
+    if (delta_total > 0) {
+        return 100.00 * delta_usage / delta_total;
+    } 
+
+    return 0.0;
+}
+
+int Common::calcul_mem_active(const System::system_stats* current) {
+    if (current->mem.mem_total != 0 && current->mem.mem_available != 0) {
+        return 100.0 * (current->mem.mem_total - current->mem.mem_available) / current->mem.mem_total;
+    }
+
+    return 0;
+}
