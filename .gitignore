@@ -1,0 +1,7 @@
+.env
+*.o
+systat
+client
+server
+printstat
+client_test

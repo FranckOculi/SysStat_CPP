@@ -29,5 +29,5 @@ The printstat function will call system service and print result in your termina
 ### :building_construction: TODO
 -   [x] Create system service
 -   [x] Create printstat
--   [ ] Create socket server
+-   [x] Create socket server
 -   [ ] Create client test
