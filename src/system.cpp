@@ -5,13 +5,8 @@
 #include <sstream>
 #include <iostream>
 
-int System::cpu_info(cpu_stats* cpu) {
-    if (cpu == nullptr) {
-        Common::print_log(stderr, "cpu_info : NULL pointer provided\n");
-        return 1;
-    }
-
-    const std::string cpu_path = "/proc/stat";
+System::cpu_stats System::cpu_info() {
+    cpu_stats cpu = {};
     std::ifstream cpu_file(cpu_path);
     
     if (!cpu_file.is_open()) {
@@ -27,26 +22,21 @@ int System::cpu_info(cpu_stats* cpu) {
     std::string label;
 
     if (
-        !(s >> label >> cpu->user >> cpu->nice >> cpu->system >> cpu->idle >> cpu->iowait
-            >> cpu->irq >> cpu->softirq >> cpu->steal >> cpu->guest >> cpu->guest_nice)
+        !(s >> label >> cpu.user >> cpu.nice >> cpu.system >> cpu.idle >> cpu.iowait
+            >> cpu.irq >> cpu.softirq >> cpu.steal >> cpu.guest >> cpu.guest_nice)
     ) {
         throw std::runtime_error("cpu_info : unexpected format");
     }
 
-    cpu->total = cpu->user + cpu->nice + cpu->system + cpu->idle + cpu->iowait +
-    cpu->irq + cpu->softirq + cpu->steal;
-    cpu->idle_time = cpu->idle + cpu->iowait;
+    cpu.total = cpu.user + cpu.nice + cpu.system + cpu.idle + cpu.iowait +
+    cpu.irq + cpu.softirq + cpu.steal;
+    cpu.idle_time = cpu.idle + cpu.iowait;
 
-    return 0;
+    return cpu;
 }
 
-int System::mem_info(mem_stats* mem) {
-    if (mem == nullptr) {
-        Common::print_log(stderr, "mem_info : NULL pointer provided\n");
-        return -1;
-    }
-
-    std::string mem_path = "/proc/meminfo";
+System::mem_stats System::mem_info() {
+    mem_stats mem = {};
     std::ifstream mem_file(mem_path);
 
     if (!mem_file.is_open()) {
@@ -57,66 +47,64 @@ int System::mem_info(mem_stats* mem) {
     std::string label;
     unsigned long long value = 0;
 
-    mem->mem_total = 0;
-    mem->mem_available = 0;
+    mem.mem_total = 0;
+    mem.mem_available = 0;
 
 
     while(std::getline(mem_file, line)) {
         std::istringstream s(line);
         if (std::getline(s, label, ':')) {
             s >> value;
-            if (label == "MemTotal") mem->mem_total = value;
-            else if (label == "MemAvailable") mem->mem_available = value;
+            if (label == "MemTotal") mem.mem_total = value;
+            else if (label == "MemAvailable") mem.mem_available = value;
         }
     }
 
-    if (mem->mem_total == 0 || mem->mem_available == 0) {
+    if (mem.mem_total == 0 || mem.mem_available == 0) {
         throw std::runtime_error("mem_info : failed to read memTotal or memAvailable\n");
     } 
 
-    return 0;
+    return mem;
 }
 
-int System::uptime_info(int* hours, int* minutes) {
-    if (hours == nullptr || minutes == nullptr) {
-        Common::print_log(stderr, "uptime_info : NULL pointer provided\n");
-        return -1;
-    }
-
-    std::string uptime_path = "/proc/uptime";
+System::uptime_stats System::uptime_info() {
+    uptime_stats uptime = {};
     std::ifstream uptime_file(uptime_path);
    
     if (!uptime_file.is_open()) {
         throw std::runtime_error("uptime_info : can't open : " + uptime_path);
     }
 
-    double uptime, idle;
+    double uptime_value, idle_value;
 
     std::string line;
     std::getline(uptime_file, line);
     std::istringstream s(line);
-    if (!(s >> uptime >> idle)) {
+    if (!(s >> uptime_value >> idle_value)) {
         throw std::runtime_error("uptime_info : failed to read data");
     }
     
-    *hours = (int)(uptime / 3600);
-    *minutes = (int)(uptime / 60) % 60;
+    uptime.hours = (int)(uptime_value / 3600);
+    uptime.minutes = (int)(uptime_value / 60) % 60;
 
-    return 0;
+    return uptime;
 }
 
-int System::system_infos(system_stats* system_stats) {
-    if (system_stats == nullptr) {
-        Common::print_log(stderr, "system_infos : NULL pointer provided\n");
-        return -1;
+template <typename F, typename T> T System::safe_call(F func, T stats) {
+    try {
+        return func();
+    } catch (...) {
+        return stats;
     }
+}
 
-    int output = 0;
-    if ((output = cpu_info(&system_stats->cpu)) != 0) return output;
-    if ((output = mem_info(&system_stats->mem)) != 0) return output;
-    if ((output = uptime_info(&system_stats->uptime_hours, &system_stats->uptime_minutes)) != 0) return output;
+System::system_stats System::system_infos() {
+    system_stats stats = {};
+    stats.cpu = safe_call([this]{ return cpu_info(); }, stats.cpu);
+    stats.mem = safe_call([this]{ return mem_info(); }, stats.mem);
+    stats.uptime = safe_call([this]{ return uptime_info(); }, stats.uptime);
 
-    return output;
+    return stats;
 }
 
 

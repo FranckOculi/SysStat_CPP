@@ -20,21 +20,15 @@ int main(void) {
     System::system_stats current = {};
 
     System sys;
-    int output = 0;
-
-    if ((output = sys.system_infos(&prev)) != 0) {
-        return output;
-    }
+    prev = sys.system_infos();
 
     std::this_thread::sleep_for(INTERVAL); 
 
-    if ((output = sys.system_infos(&current)) != 0) {
-        return output;
-    }
+    current = sys.system_infos();
 
     Common::print_cpu(Common::calcul_cpu_active(&current, &prev));
     Common::print_mem(Common::calcul_mem_active(&current));
-    Common::print_uptime(current.uptime_hours, current.uptime_minutes);
+    Common::print_uptime(current.uptime.hours, current.uptime.minutes);
 
     return 0; 
 }

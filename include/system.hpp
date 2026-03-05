@@ -1,6 +1,8 @@
 #ifndef __SYSTEM__
 #define __SYSTEM__
 
+#include <string>
+
 class System {
     public :
         /* data from /proc/stat */
@@ -14,19 +16,28 @@ class System {
             unsigned long long mem_total, mem_available;
         };
 
+        /* data from /proc/uptime */
+        struct uptime_stats {
+            int hours, minutes;
+        };
+
         struct system_stats {
             cpu_stats cpu;
             mem_stats mem;
-            int uptime_hours; /* data from /proc/uptime */
-            int uptime_minutes; /* data from /proc/uptime */
+            uptime_stats uptime;
         };
 
-        int system_infos(system_stats* system_stats);
+        system_stats system_infos();
 
     private :
-        int cpu_info(cpu_stats* cpu);
-        int mem_info(mem_stats* mem);
-        int uptime_info(int *hours, int *minutes);
+        cpu_stats cpu_info();
+        mem_stats mem_info();
+        uptime_stats uptime_info();
+        template <typename F, typename T> T safe_call(F func, T stats);
+
+        const std::string cpu_path = "/proc/stat";
+        const std::string mem_path = "/proc/meminfo";
+        const std::string uptime_path = "/proc/uptime";
 };
 
 #endif
