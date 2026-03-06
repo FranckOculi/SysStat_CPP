@@ -1,4 +1,4 @@
-#include "network.hpp"
+#include "server.hpp"
 #include "common.hpp"
 
 #include <cstdio>
@@ -119,9 +119,10 @@ void demonize() {
 }
 
 int main(void) {
-    Network n;
     demonize();
-    Common::print_log(stdout, "Starting system stats monitor...\n");
 
-    return n.run(close_log_file);
+    Common::print_log(stdout, "Starting system stats monitor...\n");
+    Server n(close_log_file);
+
+    return n.run();
 }

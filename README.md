@@ -31,5 +31,5 @@ The printstat function will call system service and print result in your termina
 -   [x] Create printstat
 -   [x] Create socket server
 -   [x] Daemonize app
+-   [x] Move structure for RAII
 -   [ ] Create client test
--   [ ] Move structure for RAII
