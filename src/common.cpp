@@ -55,4 +55,6 @@ void Common::print_log(FILE *stream, const char *fmt, ...) {
     va_start(args, fmt);
     vfprintf(stream, fmt, args);
     va_end(args);
+    
+    fflush(stream);
 }

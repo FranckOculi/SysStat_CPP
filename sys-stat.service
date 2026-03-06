@@ -1,0 +1,10 @@
+[Unit]
+Description=Expose sytem metrics to local socket server
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/sys-stat
+PIDFile=/run/user/1000/sys-stat.pid
+Restart=on-failure
+User=chouchou

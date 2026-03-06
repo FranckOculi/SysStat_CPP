@@ -1,7 +1,6 @@
 .env
 *.o
-systat
-client
-server
-printstat
-client_test
+server.o
+sys-stat
+print-stat
+client-test

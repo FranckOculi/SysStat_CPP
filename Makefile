@@ -1,15 +1,15 @@
 CXX = g++
 CFLAGS ?= -Wall -Wextra -I include
 
-all: systat printstat
+all: sys-stat print-stat client-test
 
-systat: main.o system.o server.o common.o
+sys-stat: main.o system.o server.o common.o
 	$(CXX) $(CFLAGS) -o $@ $^
 
-printstat: printstat.o system.o common.o
+print-stat: printstat.o system.o common.o
 	$(CXX) $(CFLAGS) -o $@ $^
 
-client_test: client_test.o socket.o system.o common.o
+client-test: client_test.o system.o common.o
 	$(CXX) $(CFLAGS) -o $@ $^
 
 %.o: src/%.cpp

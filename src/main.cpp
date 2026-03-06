@@ -11,8 +11,8 @@
 #include <sys/types.h>
 #include <stdexcept>
 
-#define LOGFILE "/tmp/daemon_test.log"
-#define PIDFILE "/tmp/daemon_test.pid"
+#define LOGFILE "/tmp/sys-stat.log"
+#define PIDFILE "/run/user/1000/sys-stat.pid"
 
 void close_log_file() {
     unlink(PIDFILE);
