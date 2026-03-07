@@ -9,6 +9,13 @@
 
 class Client : public Socket {
     public :
+        struct sys_metrics {
+            int cpu;
+            int mem;
+            int uptime_hours;
+            int uptime_minutes;
+        };
+
         Client() {
             create();
             connect_to_socket_addr();
@@ -42,10 +49,27 @@ class Client : public Socket {
             prev_buffer = current_buffer;
         };
 
+        sys_metrics get_metrics() {
+            if (first_call == true) {
+                first_call = false;
+            } else {
+                metrics.cpu = Common::calcul_cpu_active(&current_buffer, &prev_buffer);
+            }
+
+            metrics.mem  =Common::calcul_mem_active(&current_buffer);
+            metrics.uptime_hours = current_buffer.uptime.hours;
+            metrics.uptime_minutes = current_buffer.uptime.minutes;
+
+            prev_buffer = current_buffer;
+
+            return metrics;
+        }
+
     private :
         unsigned int first_call = true;
         System::system_stats prev_buffer = {};
         System::system_stats current_buffer = {};    
+        sys_metrics metrics = {};
 };
 
 #endif
