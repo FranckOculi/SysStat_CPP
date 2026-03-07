@@ -4,3 +4,4 @@ server.o
 sys-stat
 print-stat
 client-test
+gui
