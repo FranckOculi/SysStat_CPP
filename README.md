@@ -3,6 +3,7 @@ Systat is a system monitoring tool written in C++, designed as a modern replacem
 
 This project collects **system metrics (CPU, memory usage, uptime) and runs as a daemon compatible with systemd**, using modern C++ practices like RAII.
 
+<br/>
 
 ## :book: Description
 Systat is a system monitoring tool written in C++, designed as a modern replacement for my original C implementation.
@@ -17,14 +18,17 @@ Fully RAII-compliant for safer resource management.
 
 Compatible with systemd services for automatic startup.
 
+<br/>
 
-### ⚙️ Requirements
+## ⚙️ Requirements
 - G++
 - Make
 - A Unix-like system (Linux recommended)
 - FLTK library (Fast Light Toolkit)
 
-### :hammer: Build 
+<br/>
+
+## :hammer_and_wrench: Build 
 To compile all binaries
 ```bash
 make all
@@ -37,9 +41,10 @@ This will produce :
 - client-test → test client to ping the daemon
 - print-stat → command-line utility to print metrics once
 
+<br/>
 
-### :rocket: Usage
-1️⃣ Start the daemon
+## :rocket: Usage
+### 1️⃣ Start the daemon
 ```bash
 ./sys-stat
 ```
@@ -49,7 +54,7 @@ This will produce :
 - Logs are written to /tmp/sys-stat.log (or /run/user/<uid>/sys-stat.log if configured).
 
 
-2️⃣ Start the GUI
+### 2️⃣ Start the GUI
 ```bash
 ./sys-stat-ui
 ```
@@ -59,9 +64,10 @@ This will produce :
 - The GUI does not collect metrics itself; it only queries the daemon.
 - The daemon must be running before starting the GUI.
 
+<br/>
 
-### :test_tube: Test
-1️⃣ Test the client / daemon communication
+## :test_tube: Test
+### 1️⃣ Test the client / daemon communication
 
 ```bash
 ./client-test
@@ -72,7 +78,7 @@ This will produce :
 - Requests system metrics and prints the response in the console.
 - Useful to verify that the daemon is running and responding correctly.
 
-2️⃣ Print metrics directly (no daemon required)
+### 2️⃣ Print metrics directly (no daemon required)
 
 ```bash
 ./print-stat
@@ -82,29 +88,30 @@ This will produce :
 - Runs independently without connecting to the daemon.
 - Useful for debugging the metric collection logic.
 
+<br/>
 
-### :hammer_and_wrench: Run daemon service
-1️⃣ Copy the daemon binary
+## :satellite: Run daemon service
+### 1️⃣ Copy the daemon binary
 
 ```bash
 cp sys-stat /usr/bin/sys-stat
 chmod +x /usr/bin/sys-stat
 ```
 
-2️⃣ Copy the systemd unit file
+### 2️⃣ Copy the systemd unit file
 
 ```bash
 cp sys-stat.service /usr/lib/systemd/system/sys-stat.service
 ```
 
-3️⃣ Start the service
+### 3️⃣ Start the service
 
 ```bash
 systemctl start sys-stat
 ```
 You need to adapt the user configuration in "sys-stat.service" before (option "User" in the service section).
 
-4️⃣ Check satus log
+### 4️⃣ Check satus log
 
 ```bash
 systemctl status sys-stat
@@ -112,38 +119,39 @@ journalctl -u sys-stat -f
 cat /tmp/sys-stat.log
 ```
 
+<br/>
 
-### :hammer_and_wrench: Run GUI service
-1️⃣ Copy the gui binary
+## :desktop_computer: Run GUI service
+### 1️⃣ Copy the gui binary
 
 ```bash
 cp sys-stat-ui /usr/bin/sys-stat-ui
 chmod +x /usr/bin/sys-stat-ui
 ```
 
-2️⃣ Copy the systemd unit file to the **user session**
+### 2️⃣ Copy the systemd unit file to the **user session**
 
 ```bash
 cp sys-stat-ui.service ~/.config/systemd/user/sys-stat-ui.service
 ```
 
-3️⃣ Start the GUI service
+### 3️⃣ Start the GUI service
 
 ```bash
 systemctl --user start sys-stat-ui
 ```
 The service must be run within the user’s graphical session to inherit all necessary environment variables (e.g., WAYLAND_DISPLAY, DBUS_SESSION_BUS_ADDRESS ...).
 
-4️⃣ Check satus log
+### 4️⃣ Check satus log
 
 ```bash
 systemctl status sys-stat-ui
 journalctl -u sys-stat-ui
 ```
 
+<br/>
 
-
-### :building_construction: TODO
+## :building_construction: TODO
 -   [x] Create system service
 -   [x] Create printstat
 -   [x] Create socket server
@@ -152,10 +160,11 @@ journalctl -u sys-stat-ui
 -   [x] Create client test
 -   [x] Create systemd service
 -   [x] Create ui
--   [ ] Create systemd service for gui
+-   [x] Create systemd service for gui
 
+<br/>
 
-### :bulb: Notes
+## :bulb: Notes
 - PID files must be writable by the current user running the daemon. `chmod +x ...`
 - The daemon will not start if an instance is already running (checked via the PID file).  
   If it still fails to start after stopping the process, check whether the **socket file** needs to be removed before launching a new instance: `/tmp/sys-stat.sock`
