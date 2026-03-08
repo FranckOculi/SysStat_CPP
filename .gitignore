@@ -2,6 +2,6 @@
 *.o
 server.o
 sys-stat
+sys-stat-ui
 print-stat
 client-test
-gui

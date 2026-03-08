@@ -33,7 +33,7 @@ make all
 This will produce :
 
 - sys-stat → the daemon
-- gui -> graphical interface
+- sys-stat-ui -> graphical interface
 - client-test → test client to ping the daemon
 - print-stat → command-line utility to print metrics once
 
@@ -51,7 +51,7 @@ This will produce :
 
 2️⃣ Start the GUI
 ```bash
-./gui
+./sys-stat-ui
 ```
 
 - The graphical interface connects to the daemon through the client socket.
@@ -83,11 +83,12 @@ This will produce :
 - Useful for debugging the metric collection logic.
 
 
-### :hammer_and_wrench: Run service
+### :hammer_and_wrench: Run daemon service
 1️⃣ Copy the daemon binary
 
 ```bash
 cp sys-stat /usr/bin/sys-stat
+chmod +x /usr/bin/sys-stat
 ```
 
 2️⃣ Copy the systemd unit file
@@ -111,6 +112,37 @@ journalctl -u sys-stat -f
 cat /tmp/sys-stat.log
 ```
 
+
+### :hammer_and_wrench: Run GUI service
+1️⃣ Copy the gui binary
+
+```bash
+cp sys-stat-ui /usr/bin/sys-stat-ui
+chmod +x /usr/bin/sys-stat-ui
+```
+
+2️⃣ Copy the systemd unit file to the **user session**
+
+```bash
+cp sys-stat-ui.service ~/.config/systemd/user/sys-stat-ui.service
+```
+
+3️⃣ Start the GUI service
+
+```bash
+systemctl --user start sys-stat-ui
+```
+The service must be run within the user’s graphical session to inherit all necessary environment variables (e.g., WAYLAND_DISPLAY, DBUS_SESSION_BUS_ADDRESS ...).
+
+4️⃣ Check satus log
+
+```bash
+systemctl status sys-stat-ui
+journalctl -u sys-stat-ui
+```
+
+
+
 ### :building_construction: TODO
 -   [x] Create system service
 -   [x] Create printstat
@@ -124,6 +156,6 @@ cat /tmp/sys-stat.log
 
 
 ### :bulb: Notes
-- Logs and PID files must be writable by the current user running the daemon. `chmod +x ...` 
+- PID files must be writable by the current user running the daemon. `chmod +x ...`
 - The daemon will not start if an instance is already running (checked via the PID file).  
-  If it still fails to start after stopping the process, check whether the **socket file** needs to be removed before launching a new instance: `/tmp/sysstat.sock`.
+  If it still fails to start after stopping the process, check whether the **socket file** needs to be removed before launching a new instance: `/tmp/sys-stat.sock`

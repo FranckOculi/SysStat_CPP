@@ -1,0 +1,11 @@
+[Unit]
+Description=Display system metrics to ui from local socket server
+After=graphical-session.target sys-stat
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sys-stat-ui
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

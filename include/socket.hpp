@@ -2,7 +2,7 @@
 #define __Socket__
 
 #define SOCKET_FAMILY AF_UNIX
-#define SOCKET_NAME "/tmp/sysstat.sock"
+#define SOCKET_NAME "/tmp/sys-stat.sock"
 #define MAX_CONNECTION_REQUEST 1
 #define BUFFER_SIZE 1024
 
