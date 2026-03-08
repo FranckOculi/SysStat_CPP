@@ -105,7 +105,7 @@ int main() {
     int win_height = top_padding + label_height + bar_height
                    + spacing_vertical + label_height + bar_height + top_padding;
 
-    win = new Fl_Window(win_width, win_height, "system-monitor");
+    win = new Fl_Window(win_width, win_height, "sys-stat-ui");
     win->border(0);
     win->color(FL_BLACK);
 
