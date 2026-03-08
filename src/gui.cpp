@@ -43,6 +43,9 @@ Fl_Box* cpu_label;
 VerticalBar* mem_bar;
 Fl_Box* mem_label;
 
+Fl_Box* uptime_value;
+Fl_Box* uptime_label;
+
 std::atomic<bool> stop_flag(false);
 Fl_Window* win;
 
@@ -62,6 +65,11 @@ void ui_update(void* userdata) {
 
     cpu_label->copy_label(("CPU : " + std::to_string(data->cpu) + "%").c_str());
     mem_label->copy_label(("MEM : " + std::to_string(data->mem) + "%").c_str());
+    uptime_value->copy_label((std::to_string(data->uptime_hours) + ":" + std::to_string(data->uptime_minutes)).c_str());
+
+    if(data->uptime_hours >= 5) uptime_value->labelcolor(FL_RED);
+    else if (data->uptime_hours > 2) uptime_value->labelcolor(FL_YELLOW);
+    else uptime_value->labelcolor(FL_GREEN);
 
     delete data;
 }
@@ -106,7 +114,7 @@ int main() {
     /* CPU */
     cpu_label = new Fl_Box(start_x, top_padding, label_width, label_height, "CPU : ...");
     cpu_label->labelcolor(FL_WHITE);
-    cpu_label->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+    cpu_label->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
     cpu_label->labelsize(12);
 
     int cpu_bar_y = top_padding + label_height;
@@ -116,11 +124,24 @@ int main() {
     int mem_label_y = cpu_bar_y + bar_height + spacing_vertical;
     mem_label = new Fl_Box(start_x, mem_label_y, label_width, label_height, "MEM : ...");
     mem_label->labelcolor(FL_WHITE);
-    mem_label->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+    mem_label->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
     mem_label->labelsize(12);
 
     int mem_bar_y = mem_label_y + label_height;
     mem_bar = new VerticalBar(start_x + (label_width - bar_width)/2, mem_bar_y, bar_width, bar_height);
+
+    /* UPTIME */
+    int uptime_label_y = mem_label_y + label_height + bar_height + spacing_vertical;
+    uptime_label = new Fl_Box(start_x, uptime_label_y, label_width, label_height, "UPTIME :");
+    uptime_label->labelcolor(FL_WHITE);
+    uptime_label->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
+    uptime_label->labelsize(12);
+
+    int uptime_value_y = uptime_label_y + label_height - 5;
+    uptime_value = new Fl_Box(start_x, uptime_value_y, label_width, label_height, "...");
+    uptime_value->labelcolor(FL_WHITE);
+    uptime_value->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
+    uptime_value->labelsize(12);
 
     Fl::lock();
     std::thread t(update_metrics);
